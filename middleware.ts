@@ -1,10 +1,12 @@
 // middleware.ts
-export { default } from "next-auth/middleware";
+import { withAuth } from "next-auth/middleware";
 
-// ISOLATED FUNCTION: Protect specific routes
+// ISOLATED FUNCTION: Explicit function export for Vercel Build
+export default withAuth;
+
+// Protect specific routes
 export const config = {
   matcher: [
-    // Yeh routes bina login ke access nahi honge
     "/dashboard/:path*",
     "/settings/:path*"
   ]
