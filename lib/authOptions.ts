@@ -16,16 +16,13 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Email aur password zaroori hai");
         }
 
-        // Frontend ab direct Backend (Node.js) API ko call karega
-        const res = await fetch("http://localhost:5000/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: credentials.email,
-            password: credentials.password,
-          }),
-        });
+       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
+const res = await fetch(`${backendUrl}/api/auth/login`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ email: credentials?.email, password: credentials?.password }),
+});
         const data = await res.json();
 
         // Agar ghalat password ya email ho
