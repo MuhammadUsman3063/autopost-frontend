@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useSearchParams, useRouter } from 'next/navigation';
 
 // ISOLATED FUNCTION: Usage Progress Bar (FR-41)
 function UsageMeter({ title, used, limit, unit }: { title: string, used: number, limit: number, unit: string }) {
@@ -68,6 +69,10 @@ function PricingCard({ name, price, posts, aiCredits, isCurrent, onUpgrade, isLo
 export default function BillingPage() {
   const { data: session, status } = useSession();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  // 2. ROUTER AUR SEARCH PARAMS INITIALIZE KARO
+  const searchParams = useSearchParams();
+  const router = useRouter();
   
   // Dynamic States
   const [subData, setSubData] = useState<any>(null);
@@ -84,11 +89,10 @@ export default function BillingPage() {
   const currentInvoices = invoices.slice(indexOfFirstInvoice, indexOfLastInvoice);
   const totalPages = Math.ceil(invoices.length / invoicesPerPage);
 
-  // 1. Fetch Dynamic Data on Load
+ // 3. USE-EFFECT MEIN SUCCESS LOGIC ADD KARO
   useEffect(() => {
     const fetchUsage = async () => {
       const userId = (session?.user as any)?.id;
-      
       if (status === "loading" || !userId) return;
       
       try {
@@ -96,8 +100,6 @@ export default function BillingPage() {
         const data = await res.json();
         if (res.ok) {
            setSubData(data.subscription);
-           // Agar backend invoices return karega toh yahan set ho jayengi:
-           // setInvoices(data.invoices || []);
         }
       } catch (error) {
         console.error("Failed to fetch billing data:", error);
@@ -105,8 +107,20 @@ export default function BillingPage() {
         setIsLoading(false);
       }
     };
+
     fetchUsage();
-  }, [session, status]);
+
+    // 🌟 NAYI LOGIC: URL CHECKER AUR AUTO-REFRESH
+    const isSuccess = searchParams.get('success');
+    if (isSuccess === 'true') {
+      // Thora wait karo taake backend DB update kar le, phir refresh karo
+      setTimeout(() => {
+        fetchUsage(); // UI Update
+        router.replace('/dashboard/billing'); // URL se ?success=true hata do
+      }, 2000);
+    }
+
+  }, [session, status, searchParams, router]);
 
   // 2. Stripe Checkout Redirect Handler
   const handleUpgradePlan = async (planType: string) => {
