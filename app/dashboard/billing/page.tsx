@@ -96,10 +96,13 @@ export default function BillingPage() {
       if (status === "loading" || !userId) return;
       
       try {
-        const res = await fetch(`http://localhost:5000/api/billing/subscription?tenantId=${userId}`);
+       const res = await fetch(`http://localhost:5000/api/billing/subscription?tenantId=${userId}`);
         const data = await res.json();
         if (res.ok) {
            setSubData(data.subscription);
+           
+           // NAYA: Backend se aane wali invoices ko state mein save karo
+           setInvoices(data.invoices || []);
         }
       } catch (error) {
         console.error("Failed to fetch billing data:", error);
