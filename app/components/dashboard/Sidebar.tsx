@@ -29,8 +29,20 @@ export default function Sidebar() {
         { name: "Billing", path: "/dashboard/billing", icon: "💳" },
         { name: "Team & Roles", path: "/dashboard/settings/team", icon: "👥" },
       ]
-    }
+    },
+    {
+      title: "EMAIL OUTREACH",
+      items: [
+        { name: "Reply Inbox", path: "/dashboard/email/inbox", icon: "📥", badge: "New" },
+        { name: "Mailboxes", path: "/dashboard/email/mailboxes", icon: "📬" },
+        { name: "Leads Upload", path: "/dashboard/email/leads", icon: "👥" },
+        { name: "Sequences", path: "/dashboard/email/sequences", icon: "✉️" },
+        { name: "Suppression List", path: "/dashboard/email/suppression", icon: "🚫" },
+        { name: "Analytics", path: "/dashboard/email/analytics", icon: "📊" },
+      ]
+    },
   ];
+  
 
   return (
     <aside className="w-64 bg-[#181825] text-white hidden md:flex flex-col h-screen sticky top-0 overflow-y-auto custom-scrollbar">
