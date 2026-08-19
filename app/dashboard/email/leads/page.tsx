@@ -37,19 +37,35 @@ export default function LeadsUploadPage() {
 
   const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
   const handleDragLeave = () => { setIsDragging(false); };
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault(); setIsDragging(false);
+ 
+// ISOLATED FUNCTION: Strict Client-Side File Validation
+const validateAndSetFile = (selectedFile: File) => {
+    const MAX_SIZE_MB = 2;
+    const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+
+    if (selectedFile.size > MAX_SIZE_BYTES) {
+        // STRICT RULE APPLIED: Professional English Error
+        alert(`File is too large. Maximum allowed size is ${MAX_SIZE_MB}MB. Please split your list and try again.`);
+        return;
+    }
+    
+    setFile(selectedFile);
+    setUploadResult(null); // Clear previous results
+};
+
+const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault(); 
+    setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      setFile(e.dataTransfer.files[0]);
-      setUploadResult(null); 
+        validateAndSetFile(e.dataTransfer.files[0]);
     }
-  };
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+};
+
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
-      setUploadResult(null);
+        validateAndSetFile(e.target.files[0]);
     }
-  };
+};
   
   const handleClearFile = (e: React.MouseEvent) => {
     e.stopPropagation();
