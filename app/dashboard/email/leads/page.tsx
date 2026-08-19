@@ -93,11 +93,20 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     document.body.removeChild(link);
   };
 
+ // ISOLATED FUNCTION: Upload File with Strict Permissions & Notifications
   const handleUpload = async () => {
     if (!file || !sequenceId) {
       alert("Please select a file and a sequence.");
       return;
     }
+
+    // UX FIX: Strict Confirmation before firing emails
+    const confirmUpload = window.confirm(
+      "Are you sure you want to upload these leads?\n\nWARNING: Valid leads will be immediately enrolled in the sequence, and their initial emails will be queued for sending."
+    );
+    
+    if (!confirmUpload) return; // Agar user Cancel kare toh yahin rok do
+
     const userId = (session?.user as any)?.id;
     if (!userId) return;
 
@@ -114,14 +123,25 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         method: "POST",
         body: formData,
       });
+
       const data = await res.json();
+
       if (!res.ok) throw new Error(data.message || "File upload failed. Please verify the template format.");
-      
+
       setUploadResult(data);
-      setFile(null); 
+      setFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+
+      // UX FIX: Clear Professional English Notification after processing
+      if (data.summary.accepted > 0) {
+        alert(`✅ Success! ${data.summary.accepted} leads have been verified and enrolled. Their initial emails are now in the sending queue.`);
+      } else {
+        alert(`⚠️ Upload complete, but 0 leads were enrolled. Please check the error log on the right.`);
+      }
+
     } catch (error: any) {
       console.error("Upload Error:", error);
-      alert(error.message);
+      alert("❌ Error: " + error.message);
     } finally {
       setIsUploading(false);
     }
@@ -218,14 +238,14 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             </div>
 
             <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
-              <button 
-                onClick={handleUpload} 
-                disabled={!file || isUploading || !sequenceId} 
-                className="bg-[#181825] hover:bg-black text-white px-8 py-3 rounded-xl text-sm font-bold transition-colors shadow-sm disabled:opacity-70 flex items-center gap-2"
-              >
-                {isUploading ? "Processing File..." : "Upload & Validate Leads"}
-              </button>
-            </div>
+            <button
+              onClick={handleUpload}
+              disabled={!file || isUploading || !sequenceId}
+              className="bg-[#181825] hover:bg-black text-white px-8 py-3 rounded-xl text-sm font-bold transition-colors shadow-sm disabled:opacity-70"
+            >
+              {isUploading ? "Processing Leads..." : "Upload & Start Sequence"}
+            </button>
+          </div>
           </div>
         </div>
 
